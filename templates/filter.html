@@ -1,0 +1,38 @@
+{% extends "base.html" %} {% block content %}
+<style>
+  @font-face {
+    font-family: "output-font";
+    src: url(data:font/ttf;base64,{{font_output}});
+  }
+  .output-font {
+    font-family: "output-font";
+    font-size: 30vh;
+  }
+</style>
+<div class="output-font" contenteditable>ABC</div>
+<form method="post" enctype="multipart/form-data">
+  <input type="file" name="font_file" />
+  <input type="submit" value="Submit" />
+</form>
+<script>
+  document.querySelector("form").addEventListener("submit", function (event) {
+    event.preventDefault();
+    const formData = new FormData();
+    formData.append(
+      "font_file",
+      document.querySelector("input[type=file]").files[0]
+    );
+    fetch("", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then(({output_font}) => {
+        return Uint8Array.from(atob(output_font), (c) => c.charCodeAt(0))
+      })
+      .then((inputFontBuffer) => [
+        console.log(inputFontBuffer)
+      ])
+  });
+</script>
+{% endblock %}

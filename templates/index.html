@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+    {% for font_filter in font_filters %}
+        <a href="filter/{{font_filter}}">{{ font_filter }}</a>
+    {% endfor %}
+{% endblock %}
