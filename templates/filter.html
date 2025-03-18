@@ -3,14 +3,29 @@
   .output-font {
     font-size: 60vh;
   }
+  .output-image {
+    max-width: 100%;
+    max-height: 60vh;
+  }
 </style>
+<nav>
+  <ul>
+    {% for filter in filters_map %}
+      <li><a href="{{ filter}}">{{ filter }}</a></li>
+    {% endfor %}
+  </ul>
+</nav>
 {% with initial="Abc" %}
-  <div class="output-font" contenteditable>{{initial}}</div>
   <form method="post" enctype="multipart/form-data">
     <input type="text" name="preview_string" value="{{initial}}"/>
     <input type="file" name="font_file" />
     <input type="submit" value="Submit" />
   </form>
+  {% if has_font_output_function %}
+    <div class="output-font" contenteditable></div>
+  {% else %}
+    <img class="output-image" />
+  {% endif %}
 {% endwith %}
 <script>
   document.querySelector("form").addEventListener("submit", function (event) {
@@ -21,14 +36,24 @@
       body: formData,
     })
       .then((response) => response.json())
-      .then(({output_font}) => {
-        const outputFontBuffer = Uint8Array.from(atob(output_font), c => c.charCodeAt(0));
-        const newFontFace = new FontFace(`output-font-${Date.now()}`, outputFontBuffer)
-        document.fonts.add(newFontFace)
-        newFontFace.load().then(() => {
-          document.querySelector(".output-font").style.fontFamily = newFontFace.family
-          document.querySelector(".output-font").textContent = document.querySelector("input[name=preview_string]").value
-        })
+      .then(({output_font, output_image}) => {
+        if (output_font) {
+          const outputFontBuffer = Uint8Array.from(atob(output_font), c => c.charCodeAt(0));
+          const newFontFace = new FontFace(`output-font-${Date.now()}`, outputFontBuffer)
+          document.fonts.add(newFontFace)
+          newFontFace.load().then(() => {
+            document.querySelector(".output-font").style.fontFamily = newFontFace.family
+            document.querySelector(".output-font").textContent = document.querySelector("input[name=preview_string]").value
+          })
+        }
+        else {
+          const outputImageBuffer = Uint8Array.from(atob(output_image), c => c.charCodeAt(0));
+          const blob = new Blob([outputImageBuffer], {type: "image/png"});
+          const url = URL.createObjectURL(blob);
+          const img = new Image();
+          img.src = url;
+          document.querySelector(".output-image").src = url;
+        }
       })
     
   });

@@ -1,10 +1,6 @@
 from fontPens.flattenPen import FlattenPen
 from fontPens.transformPointPen import TransformPointPen 
-from fontParts.world import OpenFont
 from drawBot import *
-
-font = OpenFont("font.ufo")
-glyph = font["A"]
 
 __all__ = ["export_font"]
 
@@ -63,7 +59,7 @@ class BubblePen():
         self.other_pen.closePath()
 
 
-def export_font(glyph):
+def draw_font(glyph):
     output_pen = BezierPath()
     # flatten_pen = FlattenPen(output_pen, approximateSegmentLength=20)
     bubble_pen = BubblePen(output_pen)
@@ -74,11 +70,27 @@ def export_font(glyph):
     pens_to_apply = []
     for i in range(3):
         fill(i/3)
-        pens_to_apply.append(translate_glyph(skew_glyph(output_pen, [-i*20, i*20]), i*20))
+        pens_to_apply.append(translate_glyph(skew_glyph(output_pen, [-i*3, i*3]), i*20))
     for pen in pens_to_apply:
         pen.drawToPen(output_pen)
 
     return output_pen
 
-FONT_OUTPUT_FUNCTION = export_font
+def draw_image(font):
+    output_pen = BezierPath()
+    # flatten_pen = FlattenPen(output_pen, approximateSegmentLength=20)
+    bubble_pen = BubblePen(output_pen)
+    flatten_pen = FlattenPen(bubble_pen, segmentLines=True, approximateSegmentLength=40)
+    glyph = font["A"]
+    glyph.draw(flatten_pen)
+    drawPath(output_pen)
+
+    for i in range(3):
+        fill(i/3)
+        translated_bez = BezierPath()
+        skew_glyph(output_pen, [-i*3, i*3]).drawToPen(translated_bez)
+        drawPath(translated_bez)
+
+# FONT_OUTPUT_FUNCTION = export_font
+IMAGE_OUTPUT_FUNCTION = draw_image
     

@@ -6,6 +6,7 @@ from defcon import Font
 from ufo2ft import compileTTF
 from io import BytesIO
 import base64
+import tempfile
 
 base = Path(__file__).parent
 app = Flask(__name__)
@@ -29,18 +30,14 @@ def index():
 
 @app.route("/filter/<filter_key>", methods=["GET", "POST"])
 def font_filter(filter_key):
-    print(request.method)
     context = {}
+    font = Font("font.ufo")
     if request.method == "GET":
-        return render_template("filter.html")
-
+        return render_template("filter.html", filters_map=filters_map, has_font_output_function="FONT_OUTPUT_FUNCTION" in dir(filters_map[filter_key]))
     elif request.method == "POST":
         preview_string = request.form.get("preview_string")
         filter_module = filters_map[filter_key]
-        drawing = drawBot.newDrawing()
-        font = Font("font.ufo")
         font_output_function = getattr(filter_module, "FONT_OUTPUT_FUNCTION", None)
-        drawBot.endDrawing()
         if font_output_function:
             output_font = Font()
             for character in preview_string:
@@ -55,7 +52,15 @@ def font_filter(filter_key):
             base64_output = base64.b64encode(bytes_output.getvalue()).decode("ascii")
             context["output_font"] = base64_output
         else:
-            print(drawing)
+            font_output_function = getattr(filter_module, "IMAGE_OUTPUT_FUNCTION", None)
+            with drawBot.drawing():
+                with tempfile.NamedTemporaryFile(suffix=".png") as temp_file:
+                    font_output_function(font)
+                    drawBot.saveImage(temp_file.name)
+                    output_image = BytesIO()
+                    with open(temp_file.name, "rb") as f:
+                        output_image.write(f.read())
+                    context["output_image"] = base64.b64encode(output_image.getvalue()).decode("ascii")
         return context
 
 
