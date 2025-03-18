@@ -16,14 +16,18 @@ filters_map = {
     "filter_1": filter_1,
 }
 
+
 @app.route("/")
 def index():
     font_filters = []
     for filter_key in filters_map:
-        font_filters.append(filter_key)  # Use stem to get the filename without extension
+        font_filters.append(
+            filter_key
+        )  # Use stem to get the filename without extension
     return render_template("index.html", font_filters=font_filters)
 
-@app.route("/filter/<filter_key>", methods=['GET', 'POST'])
+
+@app.route("/filter/<filter_key>", methods=["GET", "POST"])
 def font_filter(filter_key):
     print(request.method)
     context = {}
@@ -31,6 +35,7 @@ def font_filter(filter_key):
         return render_template("filter.html")
 
     elif request.method == "POST":
+        preview_string = request.form.get("preview_string")
         filter_module = filters_map[filter_key]
         drawing = drawBot.newDrawing()
         font = Font("font.ufo")
@@ -38,12 +43,12 @@ def font_filter(filter_key):
         drawBot.endDrawing()
         if font_output_function:
             output_font = Font()
-            output_glyph = output_font.newGlyph("A")
-            output_glyph.unicode = font["A"].unicode
-            output_glyph.width = font["A"].width
-
-            filter_applied = font_output_function(font["A"])
-            filter_applied.drawToPen(output_font["A"].getPen())
+            for character in preview_string:
+                output_glyph = output_font.newGlyph(character)
+                output_glyph.unicode = font[character].unicode
+                output_glyph.width = font[character].width
+                filter_applied = font_output_function(font[character])
+                filter_applied.drawToPen(output_font[character].getPen())
             compiled_ttf = compileTTF(output_font)
             bytes_output = BytesIO()
             compiled_ttf.save(bytes_output)
@@ -52,6 +57,7 @@ def font_filter(filter_key):
         else:
             print(drawing)
         return context
+
 
 if __name__ == "__main__":
     app.run(debug=True)

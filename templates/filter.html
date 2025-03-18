@@ -1,38 +1,36 @@
 {% extends "base.html" %} {% block content %}
 <style>
-  @font-face {
-    font-family: "output-font";
-    src: url(data:font/ttf;base64,{{font_output}});
-  }
   .output-font {
-    font-family: "output-font";
-    font-size: 30vh;
+    font-size: 60vh;
   }
 </style>
-<div class="output-font" contenteditable>ABC</div>
-<form method="post" enctype="multipart/form-data">
-  <input type="file" name="font_file" />
-  <input type="submit" value="Submit" />
-</form>
+{% with initial="Abc" %}
+  <div class="output-font" contenteditable>{{initial}}</div>
+  <form method="post" enctype="multipart/form-data">
+    <input type="text" name="preview_string" value="{{initial}}"/>
+    <input type="file" name="font_file" />
+    <input type="submit" value="Submit" />
+  </form>
+{% endwith %}
 <script>
   document.querySelector("form").addEventListener("submit", function (event) {
     event.preventDefault();
-    const formData = new FormData();
-    formData.append(
-      "font_file",
-      document.querySelector("input[type=file]").files[0]
-    );
+    const formData = new FormData(event.target);
     fetch("", {
       method: "POST",
       body: formData,
     })
       .then((response) => response.json())
       .then(({output_font}) => {
-        return Uint8Array.from(atob(output_font), (c) => c.charCodeAt(0))
+        const outputFontBuffer = Uint8Array.from(atob(output_font), c => c.charCodeAt(0));
+        const newFontFace = new FontFace(`output-font-${Date.now()}`, outputFontBuffer)
+        document.fonts.add(newFontFace)
+        newFontFace.load().then(() => {
+          document.querySelector(".output-font").style.fontFamily = newFontFace.family
+          document.querySelector(".output-font").textContent = document.querySelector("input[name=preview_string]").value
+        })
       })
-      .then((inputFontBuffer) => [
-        console.log(inputFontBuffer)
-      ])
+    
   });
 </script>
 {% endblock %}

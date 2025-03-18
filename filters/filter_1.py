@@ -65,16 +65,19 @@ class BubblePen():
 
 def export_font(glyph):
     output_pen = BezierPath()
-    flatten_pen = FlattenPen(output_pen, approximateSegmentLength=20)
-    bubble_pen = BubblePen(flatten_pen)
+    # flatten_pen = FlattenPen(output_pen, approximateSegmentLength=20)
+    bubble_pen = BubblePen(output_pen)
     flatten_pen = FlattenPen(bubble_pen, segmentLines=True, approximateSegmentLength=40)
     glyph.draw(flatten_pen)
     drawPath(output_pen)
 
-    for i in range(10):
-        fill(i/10)
-        translated_pen = translate_glyph(skew_glyph(output_pen, [-i*2, i*2]), i*20)
-        drawPath(translated_pen)
+    pens_to_apply = []
+    for i in range(3):
+        fill(i/3)
+        pens_to_apply.append(translate_glyph(skew_glyph(output_pen, [-i*20, i*20]), i*20))
+    for pen in pens_to_apply:
+        pen.drawToPen(output_pen)
+
     return output_pen
 
 FONT_OUTPUT_FUNCTION = export_font
