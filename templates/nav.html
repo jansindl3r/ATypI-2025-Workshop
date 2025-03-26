@@ -1,0 +1,5 @@
+<nav class="flex-col">
+    {% for font_filter in font_filters %}
+        <a href="/filter/{{font_filter}}" class="button">{{ font_filter }}</a>
+    {% endfor %}
+</nav>

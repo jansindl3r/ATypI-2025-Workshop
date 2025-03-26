@@ -91,6 +91,6 @@ def draw_image(font):
         skew_glyph(output_pen, [-i*3, i*3]).drawToPen(translated_bez)
         drawPath(translated_bez)
 
-# FONT_OUTPUT_FUNCTION = export_font
-IMAGE_OUTPUT_FUNCTION = draw_image
+FONT_OUTPUT_FUNCTION = draw_font
+# IMAGE_OUTPUT_FUNCTION = draw_image
     

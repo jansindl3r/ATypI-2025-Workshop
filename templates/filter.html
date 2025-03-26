@@ -17,9 +17,12 @@
 </nav>
 {% with initial="Abc" %}
   <form method="post" enctype="multipart/form-data">
-    <input type="text" name="preview_string" value="{{initial}}"/>
-    <input type="file" name="font_file" />
-    <input type="submit" value="Submit" />
+    <input type="text" name="preview_string" value="{{initial}}" class="button"/>
+    <label class="button file-input">
+      <span class="file-input-label">Choose a font file</span>
+      <input type="file" name="font_file"/>
+    </label>
+    <input type="submit" value="Submit" class="button" />
   </form>
   {% if has_font_output_function %}
     <div class="output-font" contenteditable></div>
@@ -28,6 +31,10 @@
   {% endif %}
 {% endwith %}
 <script>
+  document.querySelector("form [name=font_file]").addEventListener("change", function (event) {
+    const file = event.target?.files?.[0];
+    document.querySelector(".file-input-label").textContent = file ? file.name : "Choose a font file";
+  });
   document.querySelector("form").addEventListener("submit", function (event) {
     event.preventDefault();
     const formData = new FormData(event.target);
