@@ -1,6 +1,7 @@
 from fontPens.flattenPen import FlattenPen
 from fontPens.transformPointPen import TransformPointPen 
 from drawBot import *
+from defcon import Font
 
 __all__ = ["export_font"]
 
@@ -76,21 +77,29 @@ def draw_font(glyph):
 
     return output_pen
 
-def draw_image(font):
-    output_pen = BezierPath()
-    # flatten_pen = FlattenPen(output_pen, approximateSegmentLength=20)
-    bubble_pen = BubblePen(output_pen)
-    flatten_pen = FlattenPen(bubble_pen, segmentLines=True, approximateSegmentLength=40)
-    glyph = font["A"]
-    glyph.draw(flatten_pen)
-    drawPath(output_pen)
+def draw_image(font, glyph_names):
+    glyph_widths = sum([font[glyph_name].width for glyph_name in glyph_names])
+    upem = font.info.unitsPerEm
+    size(glyph_widths*1000/upem, 1000)
+    scale(1000/upem)
+    for glyph_name in glyph_names:
+        glyph = font[glyph_name]
+        output_pen = BezierPath()
+        # flatten_pen = FlattenPen(output_pen, approximateSegmentLength=20)
+        bubble_pen = BubblePen(output_pen)
+        flatten_pen = FlattenPen(bubble_pen, segmentLines=True, approximateSegmentLength=40)
+        glyph.draw(flatten_pen)
+        drawPath(output_pen)
 
-    for i in range(3):
-        fill(i/3)
-        translated_bez = BezierPath()
-        skew_glyph(output_pen, [-i*3, i*3]).drawToPen(translated_bez)
-        drawPath(translated_bez)
+        for i in range(3):
+            fill(i/3)
+            translated_bez = BezierPath()
+            skew_glyph(output_pen, [-i*3, i*3]).drawToPen(translated_bez)
+            drawPath(translated_bez)
+        translate(glyph.width, 0)
 
-FONT_OUTPUT_FUNCTION = draw_font
-# IMAGE_OUTPUT_FUNCTION = draw_image
-    
+#FONT_OUTPUT_FUNCTION = draw_font
+IMAGE_OUTPUT_FUNCTION = draw_image
+font = Font("/Users/jansindler/Desktop/Arial.ufo")
+glyph_names = ["A", "b", "c"]
+draw_image(font, glyph_names)

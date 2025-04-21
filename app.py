@@ -35,6 +35,13 @@ def extract_glyphs(tt_font, glyph_names_to_process, ufo):
             glyph.width = glyph_set_glyph.width
 
 
+def extract_font_info(tt_font, ufo):
+    ufo.info.ascender = tt_font["hhea"].ascent
+    ufo.info.descender = tt_font["hhea"].descent
+    ufo.info.xHeight = tt_font["OS/2"].sxHeight
+    ufo.info.capHeight = tt_font["OS/2"].sCapHeight
+    ufo.info.unitsPerEm = tt_font["head"].unitsPerEm  
+
 @app.route("/")
 def index():
     font_filters = []
@@ -55,6 +62,7 @@ def font_filter(filter_key):
         font = Font()
         preview_string = request.form.get("preview_string")
         extract_glyphs(tt_font, preview_string, font)
+        extract_font_info(tt_font, font)
         filter_module = filters_map[filter_key]
         font_output_function = getattr(filter_module, "FONT_OUTPUT_FUNCTION", None)
         if font_output_function:
@@ -74,7 +82,7 @@ def font_filter(filter_key):
             font_output_function = getattr(filter_module, "IMAGE_OUTPUT_FUNCTION", None)
             with drawBot.drawing():
                 with tempfile.NamedTemporaryFile(suffix=".png") as temp_file:
-                    font_output_function(font)
+                    font_output_function(font, preview_string)
                     drawBot.saveImage(temp_file.name)
                     output_image = BytesIO()
                     with open(temp_file.name, "rb") as f:

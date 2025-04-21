@@ -1,7 +1,7 @@
 {% extends "base.html" %} {% block content %}
 <style>
   .output-font {
-    font-size: 60vh;
+    font-size: 30vh;
   }
   .output-image {
     max-width: 100%;
@@ -25,7 +25,7 @@
     <input type="submit" value="Submit" class="button" />
   </form>
   {% if has_font_output_function %}
-    <div class="output-font" contenteditable></div>
+    <div class="output-font"></div>
   {% else %}
     <img class="output-image" />
   {% endif %}

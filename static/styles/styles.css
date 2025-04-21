@@ -18,8 +18,10 @@ a, a:visited, a:active {
   background-color: #fff;
   color: #000;
   text-align: center;
-  text-transform: uppercase;
   cursor: pointer;
+}
+.button:not([type=text]) {
+  text-transform: uppercase;
 }
 
 .file-input {
